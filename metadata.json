@@ -1,0 +1,6 @@
+{
+  "name": "DZA Connect | ديزاد كونكت",
+  "description": "منصة fenkDZ (فنك ديزاد) - شبكة تواصل اجتماعي وتجاري جزائرية وعربية ترتكز على المجتمع المحلي، الولايات الـ 58، صوت المجتمع والاستطلاعات، السوق المحلي بالدينار، اللحظات المصورة، والمجموعات المتخصصة مع مساعد ذكاء اصطناعي.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
