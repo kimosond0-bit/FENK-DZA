@@ -28,19 +28,19 @@ export const OWNER_USER: User = {
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
   coverImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&auto=format&fit=crop&q=80',
   coverPhoto: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&auto=format&fit=crop&q=80',
-  bio: '👑 المالك والمؤسس العام لشبكة fenkDZ الجزائرية | الإدارة المركزية والتحكم بكافة الحسابات والـ 69 ولاية 🇩🇿',
+  bio: '👑 المالك والمؤسس العام لشبكة hakeDZ الجزائرية | الإدارة المركزية والتحكم بكافة الحسابات والـ 69 ولاية 🇩🇿',
   isVerified: true,
   isBusiness: false,
   followersCount: 69000,
   followingCount: 69,
   reputationPoints: 99999,
-  badge: '👑 شارة الفنك العليا (Supreme Owner)',
+  badge: '👑 شارة حَاكْ العليا (Supreme Owner)',
   hasSupremeBadge: true,
   role: 'owner',
   tier: 'business',
   phone: '0777 94 63 98',
   whatsapp: '+213777946398',
-  email: 'owner@fenkdz.com',
+  email: 'owner@hakedz.com',
   joinedDate: 'المؤسس الأول'
 };
 

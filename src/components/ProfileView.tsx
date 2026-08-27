@@ -110,7 +110,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   {user.hasSupremeBadge && (
                     <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-300 text-slate-950 font-black shadow-md flex items-center gap-1.5 border border-amber-400">
                       <span>👑</span>
-                      <span>شارة الفنك العليا (Supreme Badge)</span>
+                      <span>شارة حَاكْ العليا (Hake Supreme Badge)</span>
                     </span>
                   )}
 

@@ -49,6 +49,7 @@ import { NotificationsView } from './components/NotificationsView';
 import { AdminDashboardView } from './components/AdminDashboardView';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { AuthModal } from './components/AuthModal';
+import { SplashScreen } from './components/SplashScreen';
 import { sounds } from './utils/soundEffects';
 
 // Lucide Icons
@@ -73,10 +74,14 @@ export default function App() {
   // Theme state
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
+  // App Initial Splash & Onboarding State
+  const [showSplash, setShowSplash] = useState<boolean>(true);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('register');
+
   // App core state (Default to OWNER_USER: الحساب الوحيد صاحب لوحة التحكم الشاملة)
   const [currentUser, setCurrentUser] = useState<User>(() => {
     try {
-      const cached = localStorage.getItem('fenkdz_current_user');
+      const cached = localStorage.getItem('hakedz_current_user') || localStorage.getItem('fenkdz_current_user');
       if (cached) {
         return JSON.parse(cached);
       }
@@ -97,10 +102,18 @@ export default function App() {
   const [activeCommentsPost, setActiveCommentsPost] = useState<Post | null>(null);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
+  // Splash Screen completion handler -> Opens registration modal immediately
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+    setAuthModalMode('register');
+    setIsAuthModalOpen(true);
+    sounds.playPop();
+  };
+
   // Save currentUser in localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('fenkdz_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('hakedz_current_user', JSON.stringify(currentUser));
     } catch (e) {
       // ignore
     }
@@ -402,7 +415,7 @@ export default function App() {
       return {
         ...u,
         hasSupremeBadge: nextState,
-        badge: nextState ? '👑 شارة الفنك العليا' : (u.isBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐')
+        badge: nextState ? '👑 شارة حَاكْ العليا' : (u.isBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐')
       };
     }));
 
@@ -412,7 +425,7 @@ export default function App() {
         return {
           ...prev,
           hasSupremeBadge: nextState,
-          badge: nextState ? '👑 شارة الفنك العليا' : (prev.isBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐')
+          badge: nextState ? '👑 شارة حَاكْ العليا' : (prev.isBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐')
         };
       });
     }
@@ -425,7 +438,7 @@ export default function App() {
         author: {
           ...p.author,
           hasSupremeBadge: nextState,
-          badge: nextState ? '👑 شارة الفنك العليا' : (p.author.isBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐')
+          badge: nextState ? '👑 شارة حَاكْ العليا' : (p.author.isBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐')
         }
       };
     }));
@@ -485,7 +498,10 @@ export default function App() {
         unreadNotificationsCount={unreadNotificationsCount}
         onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
         onOpenCreatePost={() => setIsCreatePostOpen(true)}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenAuthModal={(mode) => {
+          setAuthModalMode(mode === 'login' ? 'login' : 'register');
+          setIsAuthModalOpen(true);
+        }}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         searchQuery={searchQuery}
@@ -505,7 +521,10 @@ export default function App() {
           unreadNotificationsCount={unreadNotificationsCount}
           onOpenCreatePost={() => setIsCreatePostOpen(true)}
           onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
-          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onOpenAuthModal={() => {
+            setAuthModalMode('login');
+            setIsAuthModalOpen(true);
+          }}
         />
 
         {/* Center Main Dynamic Content Area */}
@@ -883,8 +902,13 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
         availableUsers={users}
-        defaultMode="register"
+        defaultMode={authModalMode}
       />
+
+      {/* Initial Animated Brand Splash Screen */}
+      {showSplash && (
+        <SplashScreen onFinish={handleSplashFinish} />
+      )}
     </div>
   );
 }

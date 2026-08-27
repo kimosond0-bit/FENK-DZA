@@ -30,7 +30,7 @@ import {
 import { User, UserRole, AccountTier } from '../types';
 import { ALGERIA_WILAYAS } from '../data/wilayas';
 import { OWNER_PHONE, OWNER_PASS, OWNER_USER } from '../data/initialData';
-import { FenkLogo } from './FenkLogo';
+import { HakeLogo } from './HakeLogo';
 import { sounds } from '../utils/soundEffects';
 
 interface AuthModalProps {
@@ -44,10 +44,10 @@ interface AuthModalProps {
 // Preset Algerian Profile Avatars
 const PRESET_AVATARS = [
   {
-    id: 'fennec_1',
-    label: 'فنك DZ البطل',
+    id: 'hake_1',
+    label: 'شعار حَاكْ ديزاد 🇩🇿',
     url: 'https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?w=150&auto=format&fit=crop&q=80',
-    type: 'fennec'
+    type: 'hake'
   },
   {
     id: 'male_1',
@@ -95,7 +95,7 @@ const ALGERIAN_INTERESTS = [
 
 // Bio Templates
 const BIO_TEMPLATES = [
-  '🇩🇿 فخور ببلادي ومتابع لأحدث أخبار ولايتي في مجتمع fenkDZ.',
+  '🇩🇿 فخور ببلادي ومتابع لأحدث أخبار ولايتي في مجتمع hakeDZ.',
   '💡 مهتم بالتقنية، العمل الحر ومشاريع الشباب في الجزائر.',
   '🚗 مهتم بجديد سوق السيارات وسوق دلالة بالدينار الجزائري.',
   '🌟 مواطن جزائري إيجابي، أشارك لخدمة ولايتي والمجتمع.'
@@ -158,6 +158,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Error & Loading states
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Sync mode with defaultMode when modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      setMode(defaultMode || 'register');
+      setErrorMsg('');
+    }
+  }, [isOpen, defaultMode]);
 
   // Countdown timer effect for OTP
   useEffect(() => {
@@ -318,7 +326,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Step 3 -> Step 4 (Send SMS OTP)
   const handleNextFromStep3 = () => {
     if (!agreeTerms) {
-      setErrorMsg('يرجى الموافقة على شروط الاستخدام لمجتمع fenkDZ الجزائري.');
+      setErrorMsg('يرجى الموافقة على شروط الاستخدام لمجتمع hakeDZ الجزائري.');
       sounds.playUnlike();
       return;
     }
@@ -364,7 +372,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       coverPhoto: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&auto=format&fit=crop&q=80',
       bio: bio.trim() || (isBusinessAccount 
         ? `${businessName || name} - ${businessType} في ولاية ${selectedWilayaObj.nameAr} 🇩🇿 | هاتف: ${phoneCheck.formatted}`
-        : `عضو جديد في مجتمع fenkDZ من ولاية ${selectedWilayaObj.nameAr} 🇩🇿`),
+        : `عضو جديد في مجتمع hakeDZ من ولاية ${selectedWilayaObj.nameAr} 🇩🇿`),
       isVerified: true, // Phone-verified
       isBusiness: isBusinessAccount,
       businessName: isBusinessAccount ? (businessName || name) : undefined,
@@ -478,10 +486,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         
         {/* Simulated Incoming SMS Toast Banner */}
         {isSimulatedSmsBannerVisible && currentStep === 4 && (
-          <div className="bg-gradient-to-r from-cyan-600 to-emerald-600 text-white px-4 py-2.5 flex items-center justify-between text-xs animate-in slide-in-from-top-4 shadow-md">
+          <div className="bg-gradient-to-r from-sky-600 to-emerald-600 text-white px-4 py-2.5 flex items-center justify-between text-xs animate-in slide-in-from-top-4 shadow-md">
             <div className="flex items-center gap-2">
               <span className="p-1 rounded bg-white/20 text-xs">💬 SMS</span>
-              <span><strong>رسالة نصية جديدة من fenkDZ:</strong> رمز تأكيد حسابك هو <strong className="font-mono bg-white text-slate-900 px-1.5 py-0.5 rounded font-black text-sm">2130</strong></span>
+              <span><strong>رسالة نصية جديدة من hakeDZ:</strong> رمز تأكيد حسابك هو <strong className="font-mono bg-white text-slate-900 px-1.5 py-0.5 rounded font-black text-sm">2130</strong></span>
             </div>
             <button
               type="button"
@@ -499,7 +507,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Top Header */}
         <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 text-white flex items-center justify-between border-b border-slate-800 relative">
           <div className="flex items-center gap-3">
-            <FenkLogo size="sm" showSubtitle={false} />
+            <HakeLogo size="sm" showSubtitle={false} />
             <div>
               <h3 className="font-black text-base sm:text-lg flex items-center gap-2">
                 <span>{mode === 'register' ? 'إنشاء حساب جديد (Sign Up)' : mode === 'login' ? 'تسجيل الدخول (Log In)' : 'استعادة الحساب'}</span>
@@ -510,7 +518,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <p className="text-xs text-slate-300 mt-0.5">
                 {mode === 'register' 
                   ? 'انضم لمنصة التواصل والتجارة الجزائرية الموثقة برقم الهاتف' 
-                  : 'أهلاً بك مجدداً في مجتمع fenkDZ'}
+                  : 'أهلاً بك مجدداً في مجتمع hakeDZ'}
               </p>
             </div>
           </div>
@@ -662,7 +670,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <AtSign className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
                     </div>
                     <p className="text-[10px] text-slate-400 mt-1">
-                      سيكون رابط ملفك الشخصي: fenkdz.com/@{handle || 'username'}
+                      سيكون رابط ملفك الشخصي: hakedz.com/@{handle || 'username'}
                     </p>
                   </div>
 
@@ -1038,7 +1046,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => setAgreeTerms(e.target.checked)}
                       className="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500"
                     />
-                    <span>أوافق على ميثاق الاستخدام الأخلاقي والتجاري لمجتمع fenkDZ الجزائري 🇩🇿</span>
+                    <span>أوافق على ميثاق الاستخدام الأخلاقي والتجاري لمجتمع hakeDZ الجزائري 🇩🇿</span>
                   </label>
 
                   {/* Stepper Buttons */}
@@ -1245,9 +1253,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     onClick={handleCompleteRegistration}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 hover:opacity-95 text-white font-black text-sm shadow-xl transition active:scale-95"
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600 hover:opacity-95 text-white font-black text-sm shadow-xl transition active:scale-95"
                   >
-                    <span>الدخول إلى fenkDZ واستكشاف المنشورات 🚀</span>
+                    <span>الدخول إلى hakeDZ واستكشاف المنشورات 🚀</span>
                   </button>
                 </div>
               )}
@@ -1428,8 +1436,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Modal Footer Bottom */}
         <div className="p-3 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center text-[11px] text-slate-500 flex items-center justify-between px-5">
-          <span>fenkDZ الجزائر 🇩🇿 • شبكة اجتماعية محلية</span>
-          <span className="font-mono font-bold text-cyan-600">69 Wilayas Network</span>
+          <span>hakeDZ الجزائر 🇩🇿 • شبكة اجتماعية محلية</span>
+          <span className="font-mono font-bold text-sky-600">69 Wilayas Network</span>
         </div>
 
       </div>

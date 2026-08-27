@@ -160,7 +160,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       coverPhoto: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&auto=format&fit=crop&q=80',
       bio: newUserIsBusiness
         ? `${newUserBusinessName || newUserName} - نشاط تجاري في ولاية ${wilayaObj.nameAr} 🇩🇿 | هاتف: ${formattedPhone}`
-        : `عضو مسجل في منصة fenkDZ من ولاية ${wilayaObj.nameAr} 🇩🇿`,
+        : `عضو مسجل في منصة hakeDZ من ولاية ${wilayaObj.nameAr} 🇩🇿`,
       isVerified: true,
       isBusiness: newUserIsBusiness,
       businessName: newUserIsBusiness ? (newUserBusinessName || newUserName) : undefined,
@@ -168,7 +168,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       followersCount: 12,
       followingCount: 15,
       reputationPoints: Number(newUserReputation) || 300,
-      badge: newUserHasSupreme ? '👑 شارة الفنك العليا' : (newUserIsBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐'),
+      badge: newUserHasSupreme ? '👑 شارة حَاكْ العليا' : (newUserIsBusiness ? 'متجر موثق 🏪' : 'مواطن نشط ⭐'),
       hasSupremeBadge: newUserHasSupreme,
       role: newUserRole,
       tier: newUserIsBusiness ? 'business' : 'premium',
@@ -261,10 +261,10 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-            <span>إدارة وتوجيه كافة حسابات منصة fenkDZ</span>
+            <span>إدارة وتوجيه كافة حسابات منصة hakeDZ</span>
           </h1>
           <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-            التحكم الكامل للمالك: إضافة مستخدمين جدد، حذف الحسابات، ترقية الأدوار والمشرفين، ومنح وسحب <strong className="text-amber-300">شارة الفنك العليا 👑</strong> عبر الـ 69 ولاية.
+            التحكم الكامل للمالك: إضافة مستخدمين جدد، حذف الحسابات، ترقية الأدوار والمشرفين، ومنح وسحب <strong className="text-amber-300">شارة حَاكْ العليا 👑</strong> عبر الـ 69 ولاية.
           </p>
         </div>
 
@@ -534,7 +534,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                               ? 'bg-amber-100 hover:bg-amber-200 dark:bg-amber-950 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-200 border border-amber-300'
                               : 'bg-slate-100 hover:bg-amber-50 dark:bg-slate-700 dark:hover:bg-amber-950/40 text-slate-700 dark:text-slate-300'
                           }`}
-                          title={user.hasSupremeBadge ? 'سحب الشارة العليا' : 'منح شارة الفنك العليا'}
+                          title={user.hasSupremeBadge ? 'سحب الشارة العليا' : 'منح شارة حَاكْ العليا'}
                         >
                           <Crown className={`w-3.5 h-3.5 ${user.hasSupremeBadge ? 'text-amber-600' : 'text-slate-400'}`} />
                           <span>{user.hasSupremeBadge ? 'سحب الشارة ❌' : 'منح الشارة العليا 👑'}</span>
@@ -768,7 +768,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             </div>
 
             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-              <h4 className="font-bold text-sm text-amber-900 dark:text-amber-200">3. اشتراك fenkDZ Premium</h4>
+              <h4 className="font-bold text-sm text-amber-900 dark:text-amber-200">3. اشتراك hakeDZ Premium</h4>
               <p className="text-xs text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
                 شارة الهوية الذهبية، أدوات تحسين المحتوى بـ Gemini AI بلا حدود، ودعم فني ذو أولوية.
               </p>
@@ -915,7 +915,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     <Crown className="w-4 h-4 text-amber-500" />
                     <div>
                       <span className="font-bold text-xs text-slate-900 dark:text-white block">
-                        منح شارة الفنك العليا 👑
+                        منح شارة حَاكْ العليا 👑
                       </span>
                       <span className="text-[10px] text-slate-500 dark:text-slate-400">
                         تاج ذهبي موثق يظهر على المنشورات والملف الشخصي

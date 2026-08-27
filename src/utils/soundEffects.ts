@@ -318,6 +318,13 @@ class SoundManager {
       osc.stop(now + idx * 0.04 + 0.18);
     });
   }
+
+  /**
+   * 9. Play Pop / Dialog Open Sound
+   */
+  public playPop(): void {
+    this.playLike();
+  }
 }
 
 export const sounds = new SoundManager();

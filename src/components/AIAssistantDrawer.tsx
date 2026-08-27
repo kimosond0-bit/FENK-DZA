@@ -13,7 +13,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { ALGERIA_WILAYAS } from '../data/wilayas';
-import { FenkLogo } from './FenkLogo';
+import { HakeLogo } from './HakeLogo';
 
 interface AIAssistantDrawerProps {
   isOpen: boolean;
@@ -39,7 +39,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
     {
       id: 'welcome',
       sender: 'ai',
-      text: `مرحباً بك خوية/أختي! 🇩🇿 أنا مساعد "fenkDZ" الذكي (مساعد فنك ديزاد المدعوم بالذكاء الاصطناعي). كيفاش نقدر نعاونك اليوم بخصوص ولاية ${currentWilaya.nameAr}، صياغة إعلانات السوق المحلي، تسهيل الإجراءات الإدارية، أو استطلاعات الرأي؟`,
+      text: `مرحباً بك خوية/أختي! 🇩🇿 أنا مساعد "hakeDZ" الذكي (مساعد حَاكْ ديزاد المدعوم بالذكاء الاصطناعي). كيفاش نقدر نعاونك اليوم بخصوص ولاية ${currentWilaya.nameAr}، صياغة إعلانات السوق المحلي، تسهيل الإجراءات الإدارية، أو استطلاعات الرأي؟`,
       timestamp: 'الآن'
     }
   ]);
@@ -116,10 +116,10 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-slate-900 via-emerald-950 to-teal-950 text-white">
           <div className="flex items-center gap-3">
-            <FenkLogo size="sm" showText={false} />
+            <HakeLogo size="sm" showText={false} />
             <div>
               <h3 className="font-bold text-sm sm:text-base flex items-center gap-1.5">
-                <span>مساعد fenkDZ الذكي</span>
+                <span>مساعد hakeDZ الذكي</span>
                 <span className="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">Gemini 3.7</span>
               </h3>
               <p className="text-[11px] text-slate-300 flex items-center gap-1">

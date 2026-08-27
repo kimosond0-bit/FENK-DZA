@@ -163,9 +163,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Commercial & Algerian Identity Footer */}
       <div className="mt-3 p-3.5 rounded-2xl bg-gradient-to-b from-slate-50 to-cyan-50/30 dark:from-slate-800/60 dark:to-cyan-950/20 border border-slate-200/80 dark:border-slate-700/60 text-[11px] text-slate-500 dark:text-slate-400 text-center shadow-xs">
         <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-1.5">
-          <span className="text-cyan-600 dark:text-cyan-400 font-black">fenkDZ</span>
+          <span className="text-sky-600 dark:text-sky-400 font-black">hakeDZ</span>
           <span>•</span>
-          <span>فنك ديزاد 🇩🇿</span>
+          <span>حَاكْ ديزاد 🇩🇿</span>
           <span>•</span>
           <span>69 ولاية</span>
         </p>

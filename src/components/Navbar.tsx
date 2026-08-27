@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { ALGERIA_WILAYAS } from '../data/wilayas';
 import { User } from '../types';
-import { FenkLogo } from './FenkLogo';
+import { HakeLogo } from './HakeLogo';
 import { sounds } from '../utils/soundEffects';
 
 interface NavbarProps {
@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onSelectTab('home')}
             className="flex items-center gap-2.5 text-right group focus:outline-none"
           >
-            <FenkLogo size="sm" showSubtitle={true} />
+            <HakeLogo size="sm" showSubtitle={true} />
           </button>
 
           {/* Wilaya Selector Badge */}
@@ -396,7 +396,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Footer info */}
             <div className="p-3 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
-              تغطي منصة fenkDZ (فنك ديزاد) كامل التراب الوطني عبر الـ 69 ولاية من الشمال إلى أقصى الجنوب الكبير 🇩🇿
+              تغطي منصة hakeDZ (حَاكْ ديزاد) كامل التراب الوطني عبر الـ 69 ولاية من الشمال إلى أقصى الجنوب الكبير 🇩🇿
             </div>
           </div>
         </div>
