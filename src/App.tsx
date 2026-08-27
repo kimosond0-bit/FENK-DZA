@@ -78,22 +78,36 @@ export default function App() {
   const [showSplash, setShowSplash] = useState<boolean>(true);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('register');
 
-  // App core state (Default to OWNER_USER: الحساب الوحيد صاحب لوحة التحكم الشاملة)
-  const [currentUser, setCurrentUser] = useState<User>(() => {
+  // App core state: Null by default for new visitors (Mandatory Registration/Login like other social networks)
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
-      const cached = localStorage.getItem('hakedz_current_user') || localStorage.getItem('fenkdz_current_user');
+      const isOwnerSession = localStorage.getItem('hakedz_owner_session') === 'true';
+      const cached = localStorage.getItem('hakedz_current_user');
       if (cached) {
-        return JSON.parse(cached);
+        const parsed = JSON.parse(cached);
+        // If parsed is owner but no explicit authentic owner session flag exists, do NOT allow auto-owner
+        if (parsed && (parsed.id === 'usr_owner_kimo' || parsed.role === 'owner')) {
+          if (!isOwnerSession) {
+            return null;
+          }
+        }
+        return parsed;
       }
     } catch (e) {
       // fallback
     }
-    return OWNER_USER;
+    return null;
   });
 
-  const [activeWilayaId, setActiveWilayaId] = useState<number>(16); // Default 16 (Algiers / Central Admin)
+  const cleanPhone = currentUser?.phone ? currentUser.phone.replace(/[^0-9]/g, '') : '';
+  const isOwner = (cleanPhone === '0777946398' || cleanPhone === '213777946398' || currentUser?.handle === 'kimo_owner') && currentUser?.role === 'owner';
+
+  const [activeWilayaId, setActiveWilayaId] = useState<number>(() => currentUser?.wilayaId || 57); // Default 57 (المغير) or User's Wilaya
   const [activeTab, setActiveTab] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Fallback active user for components while waiting for auth
+  const activeUser: User = currentUser || CURRENT_USER;
 
   // Modals & Drawers state
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
@@ -102,18 +116,31 @@ export default function App() {
   const [activeCommentsPost, setActiveCommentsPost] = useState<Post | null>(null);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
 
-  // Splash Screen completion handler -> Opens registration modal immediately
+  // Splash Screen completion handler -> Opens mandatory registration/login modal immediately if not authenticated
   const handleSplashFinish = () => {
     setShowSplash(false);
-    setAuthModalMode('register');
-    setIsAuthModalOpen(true);
-    sounds.playPop();
+    if (!currentUser) {
+      setAuthModalMode('register');
+      setIsAuthModalOpen(true);
+      sounds.playPop();
+    }
   };
+
+  // If user is not authenticated and splash is closed, ensure AuthModal stays open
+  useEffect(() => {
+    if (!showSplash && !currentUser) {
+      setIsAuthModalOpen(true);
+    }
+  }, [showSplash, currentUser]);
 
   // Save currentUser in localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('hakedz_current_user', JSON.stringify(currentUser));
+      if (currentUser) {
+        localStorage.setItem('hakedz_current_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('hakedz_current_user');
+      }
     } catch (e) {
       // ignore
     }
@@ -149,6 +176,11 @@ export default function App() {
 
   // Post Actions
   const handleLikePost = (postId: string) => {
+    if (!currentUser) {
+      setAuthModalMode('register');
+      setIsAuthModalOpen(true);
+      return;
+    }
     let wasLiked = false;
     setPosts(prev => prev.map(post => {
       if (post.id !== postId) return post;
@@ -167,11 +199,20 @@ export default function App() {
     }
   };
 
-  const handleBookmarkPost = (postId: string) => {
-    // handled locally or stored
+  const handleBookmarkPost = (_postId: string) => {
+    if (!currentUser) {
+      setAuthModalMode('register');
+      setIsAuthModalOpen(true);
+      return;
+    }
   };
 
   const handleVotePoll = (postId: string, optionId: string) => {
+    if (!currentUser) {
+      setAuthModalMode('register');
+      setIsAuthModalOpen(true);
+      return;
+    }
     sounds.playVote();
     setPosts(prev => prev.map(post => {
       if (post.id !== postId || !post.pollData) return post;
@@ -457,14 +498,32 @@ export default function App() {
 
   const handleUpdateUserPoints = (userId: string, points: number) => {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, reputationPoints: points } : u));
-    if (currentUser.id === userId) {
-      setCurrentUser(prev => ({ ...prev, reputationPoints: points }));
+    if (currentUser?.id === userId) {
+      setCurrentUser(prev => prev ? ({ ...prev, reputationPoints: points }) : null);
     }
+  };
+
+  // Logout Handler -> Clears session and enforces login/registration screen
+  const handleLogout = () => {
+    sounds.playPop();
+    localStorage.removeItem('hakedz_current_user');
+    localStorage.removeItem('hakedz_owner_session');
+    setCurrentUser(null);
+    setAuthModalMode('register');
+    setIsAuthModalOpen(true);
+    setActiveTab('home');
   };
 
   // Auth & Account Creation Actions
   const handleLoginSuccess = (newUser: User) => {
+    const isNewUserOwner = (newUser.phone?.replace(/[^0-9]/g, '') === '0777946398' || newUser.handle === 'kimo_owner') && newUser.role === 'owner';
+    if (isNewUserOwner) {
+      localStorage.setItem('hakedz_owner_session', 'true');
+    } else {
+      localStorage.removeItem('hakedz_owner_session');
+    }
     setCurrentUser(newUser);
+    setIsAuthModalOpen(false);
     setUsers(prev => {
       const exists = prev.some(u => u.id === newUser.id);
       return exists ? prev : [newUser, ...prev];
@@ -473,6 +532,9 @@ export default function App() {
       setActiveWilayaId(newUser.wilayaId);
     }
     setViewingUser(null);
+    if (!isNewUserOwner && activeTab === 'admin') {
+      setActiveTab('home');
+    }
   };
 
   // Filtered posts for search
@@ -497,11 +559,19 @@ export default function App() {
         unreadMessagesCount={unreadMessagesCount}
         unreadNotificationsCount={unreadNotificationsCount}
         onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
-        onOpenCreatePost={() => setIsCreatePostOpen(true)}
+        onOpenCreatePost={() => {
+          if (!currentUser) {
+            setAuthModalMode('register');
+            setIsAuthModalOpen(true);
+            return;
+          }
+          setIsCreatePostOpen(true);
+        }}
         onOpenAuthModal={(mode) => {
           setAuthModalMode(mode === 'login' ? 'login' : 'register');
           setIsAuthModalOpen(true);
         }}
+        onLogout={handleLogout}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         searchQuery={searchQuery}
@@ -515,11 +585,18 @@ export default function App() {
         <Sidebar
           activeTab={activeTab}
           onSelectTab={setActiveTab}
-          currentUser={currentUser}
+          currentUser={activeUser}
           activeWilayaId={activeWilayaId}
           unreadMessagesCount={unreadMessagesCount}
           unreadNotificationsCount={unreadNotificationsCount}
-          onOpenCreatePost={() => setIsCreatePostOpen(true)}
+          onOpenCreatePost={() => {
+            if (!currentUser) {
+              setAuthModalMode('register');
+              setIsAuthModalOpen(true);
+              return;
+            }
+            setIsCreatePostOpen(true);
+          }}
           onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
           onOpenAuthModal={() => {
             setAuthModalMode('login');
@@ -536,18 +613,25 @@ export default function App() {
               {/* Stories Bar */}
               <StoriesBar
                 stories={stories}
-                currentUser={currentUser}
+                currentUser={activeUser}
                 onAddStory={handleAddStory}
               />
 
               {/* Quick Create Post Card Banner */}
               <div 
-                onClick={() => setIsCreatePostOpen(true)}
+                onClick={() => {
+                  if (!currentUser) {
+                    setAuthModalMode('register');
+                    setIsAuthModalOpen(true);
+                    return;
+                  }
+                  setIsCreatePostOpen(true);
+                }}
                 className="bg-white dark:bg-slate-800/90 rounded-3xl p-4 border border-slate-200 dark:border-slate-700/80 shadow-sm hover:border-emerald-400 transition cursor-pointer flex items-center gap-3"
               >
                 <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
+                  src={activeUser.avatar}
+                  alt={activeUser.name}
                   className="w-11 h-11 rounded-2xl object-cover border border-emerald-500 shrink-0"
                 />
                 <div className="flex-1 bg-slate-100 dark:bg-slate-900/60 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-slate-400 font-medium">
@@ -566,7 +650,7 @@ export default function App() {
                 <PostCard
                   key={post.id}
                   post={post}
-                  currentUser={currentUser}
+                  currentUser={activeUser}
                   onLike={handleLikePost}
                   onOpenComments={(p) => setActiveCommentsPost(p)}
                   onShare={(p) => alert(`تم نسخ رابط منشور "${p.content.slice(0, 30)}..."`)}
@@ -592,7 +676,7 @@ export default function App() {
               marketplaceItems={marketplaceItems}
               businesses={INITIAL_BUSINESSES}
               lostAndFound={INITIAL_LOST_AND_FOUND}
-              currentUser={currentUser}
+              currentUser={activeUser}
               onLikePost={handleLikePost}
               onOpenComments={(p) => setActiveCommentsPost(p)}
               onSharePost={(p) => alert('تمت المشاركة بنجاح!')}
@@ -600,7 +684,14 @@ export default function App() {
               onVotePoll={handleVotePoll}
               onReportPost={handleReportPost}
               onTipDZD={handleTipDZD}
-              onOpenCreatePost={() => setIsCreatePostOpen(true)}
+              onOpenCreatePost={() => {
+                if (!currentUser) {
+                  setAuthModalMode('register');
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                setIsCreatePostOpen(true);
+              }}
               onSelectMarketItem={(item) => handleOpenChatWithSeller(item.seller)}
             />
           )}
@@ -609,7 +700,7 @@ export default function App() {
           {activeTab === 'voice' && (
             <CommunityVoiceView
               posts={posts}
-              currentUser={currentUser}
+              currentUser={activeUser}
               activeWilayaId={activeWilayaId}
               onLikePost={handleLikePost}
               onOpenComments={(p) => setActiveCommentsPost(p)}
@@ -618,7 +709,14 @@ export default function App() {
               onVotePoll={handleVotePoll}
               onReportPost={handleReportPost}
               onTipDZD={handleTipDZD}
-              onOpenCreatePoll={() => setIsCreatePostOpen(true)}
+              onOpenCreatePoll={() => {
+                if (!currentUser) {
+                  setAuthModalMode('register');
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                setIsCreatePostOpen(true);
+              }}
             />
           )}
 
@@ -626,7 +724,7 @@ export default function App() {
           {activeTab === 'moments' && (
             <MomentsView
               moments={moments}
-              currentUser={currentUser}
+              currentUser={activeUser}
               onLikeMoment={handleLikeMoment}
               onShareMoment={handleShareMoment}
             />
@@ -636,7 +734,7 @@ export default function App() {
           {activeTab === 'communities' && (
             <CommunitiesView
               communities={communities}
-              currentUser={currentUser}
+              currentUser={activeUser}
               onJoinToggle={handleJoinCommunityToggle}
               posts={posts}
               onLikePost={handleLikePost}
@@ -646,7 +744,14 @@ export default function App() {
               onVotePoll={handleVotePoll}
               onReportPost={handleReportPost}
               onTipDZD={handleTipDZD}
-              onOpenCreatePost={() => setIsCreatePostOpen(true)}
+              onOpenCreatePost={() => {
+                if (!currentUser) {
+                  setAuthModalMode('register');
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                setIsCreatePostOpen(true);
+              }}
             />
           )}
 
@@ -654,7 +759,7 @@ export default function App() {
           {activeTab === 'marketplace' && (
             <MarketplaceView
               items={marketplaceItems}
-              currentUser={currentUser}
+              currentUser={activeUser}
               activeWilayaId={activeWilayaId}
               onSelectWilaya={setActiveWilayaId}
               onAddItem={handleAddMarketItem}
@@ -666,7 +771,7 @@ export default function App() {
           {activeTab === 'messages' && (
             <MessagesView
               conversations={conversations}
-              currentUser={currentUser}
+              currentUser={activeUser}
               onSendMessage={handleSendMessage}
             />
           )}
@@ -683,40 +788,74 @@ export default function App() {
           {/* TAB 9: Profile */}
           {activeTab === 'profile' && (
             <ProfileView
-              user={viewingUser || currentUser}
-              currentUser={currentUser}
-              userPosts={posts.filter(p => p.author.id === (viewingUser?.id || currentUser.id))}
-              userMarketItems={marketplaceItems.filter(m => m.seller.id === (viewingUser?.id || currentUser.id))}
+              user={viewingUser || activeUser}
+              currentUser={activeUser}
+              userPosts={posts.filter(p => p.author.id === (viewingUser?.id || activeUser.id))}
+              userMarketItems={marketplaceItems.filter(m => m.seller.id === (viewingUser?.id || activeUser.id))}
               savedPosts={posts.slice(0, 2)}
               onLikePost={handleLikePost}
               onOpenComments={(p) => setActiveCommentsPost(p)}
-              onSharePost={(p) => alert('تمت المشاركة')}
+              onSharePost={(_p) => alert('تمت المشاركة')}
               onBookmarkPost={handleBookmarkPost}
               onVotePoll={handleVotePoll}
               onReportPost={handleReportPost}
               onTipDZD={handleTipDZD}
-              onUpdateBio={(b) => setCurrentUser(prev => ({ ...prev, bio: b }))}
+              onUpdateBio={(b) => setCurrentUser(prev => prev ? ({ ...prev, bio: b }) : null)}
               onOpenAuthModal={() => setIsAuthModalOpen(true)}
+              onLogout={handleLogout}
             />
           )}
 
-          {/* TAB 10: Admin Dashboard */}
+          {/* TAB 10: Admin Dashboard (Protected Area - Strictly for verified owner) */}
           {activeTab === 'admin' && (
-            <AdminDashboardView
-              currentUser={currentUser}
-              users={users}
-              posts={posts}
-              reports={reports}
-              onAddUser={handleAddUser}
-              onDeleteUser={handleDeleteUser}
-              onUpdateUserRole={handleUpdateUserRole}
-              onToggleSupremeBadge={handleToggleSupremeBadge}
-              onToggleVerifyUser={handleToggleVerifyUser}
-              onToggleBanUser={handleToggleBanUser}
-              onUpdateUserPoints={handleUpdateUserPoints}
-              onResolveReport={handleResolveReport}
-              onOpenAuthModal={() => setIsAuthModalOpen(true)}
-            />
+            isOwner && currentUser ? (
+              <AdminDashboardView
+                currentUser={currentUser}
+                users={users}
+                posts={posts}
+                reports={reports}
+                onAddUser={handleAddUser}
+                onDeleteUser={handleDeleteUser}
+                onUpdateUserRole={handleUpdateUserRole}
+                onToggleSupremeBadge={handleToggleSupremeBadge}
+                onToggleVerifyUser={handleToggleVerifyUser}
+                onToggleBanUser={handleToggleBanUser}
+                onUpdateUserPoints={handleUpdateUserPoints}
+                onResolveReport={handleResolveReport}
+                onOpenAuthModal={() => setIsAuthModalOpen(true)}
+              />
+            ) : (
+              <div className="bg-white dark:bg-slate-800/90 rounded-3xl p-8 sm:p-12 text-center border border-rose-200 dark:border-rose-900/60 shadow-lg space-y-4 max-w-xl mx-auto my-8">
+                <div className="w-16 h-16 rounded-2xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center">
+                  <ShieldCheck className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                  منطقة محظورة ومخصصة لمالك المنصة فقط 🔒
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                  هذه اللوحة خاصة بإدارة المنصة المركزية ولا يمكن لأي مستخدم الوصول إليها إلا عبر تسجيل الدخول ببيانات المالك السرية.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('home')}
+                    className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs transition"
+                  >
+                    العودة للصفحة الرئيسية
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthModalMode('login');
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-emerald-600 text-white font-bold text-xs shadow hover:opacity-90 transition"
+                  >
+                    تسجيل الدخول كمالك
+                  </button>
+                </div>
+              </div>
+            )
           )}
         </section>
 
@@ -847,14 +986,21 @@ export default function App() {
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         unreadMessagesCount={unreadMessagesCount}
-        onOpenCreatePost={() => setIsCreatePostOpen(true)}
+        onOpenCreatePost={() => {
+          if (!currentUser) {
+            setAuthModalMode('register');
+            setIsAuthModalOpen(true);
+            return;
+          }
+          setIsCreatePostOpen(true);
+        }}
         activeWilayaId={activeWilayaId}
-        currentUser={currentUser}
+        currentUser={activeUser}
       />
 
       {/* Create Post / Poll Modal with Gemini AI Refinement */}
       <CreatePostModal
-        currentUser={currentUser}
+        currentUser={activeUser}
         activeWilayaId={activeWilayaId}
         isOpen={isCreatePostOpen}
         onClose={() => setIsCreatePostOpen(false)}
@@ -864,7 +1010,7 @@ export default function App() {
       {/* Comments Drawer with Voice Note Support */}
       <CommentsDrawer
         post={activeCommentsPost}
-        currentUser={currentUser}
+        currentUser={activeUser}
         comments={activeCommentsPost?.commentsList || [
           {
             id: 'c1',
@@ -898,11 +1044,16 @@ export default function App() {
 
       {/* Authentication & Registration Modal (Mandatory Algerian Phone Verification) */}
       <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        isOpen={isAuthModalOpen || (!showSplash && !currentUser)}
+        onClose={() => {
+          if (currentUser) {
+            setIsAuthModalOpen(false);
+          }
+        }}
         onLoginSuccess={handleLoginSuccess}
         availableUsers={users}
         defaultMode={authModalMode}
+        isMandatory={!currentUser}
       />
 
       {/* Initial Animated Brand Splash Screen */}

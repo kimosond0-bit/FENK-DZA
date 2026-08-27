@@ -19,7 +19,8 @@ import {
   Volume2,
   VolumeX,
   UserPlus,
-  Phone
+  Phone,
+  LogOut
 } from 'lucide-react';
 import { ALGERIA_WILAYAS } from '../data/wilayas';
 import { User } from '../types';
@@ -27,7 +28,7 @@ import { HakeLogo } from './HakeLogo';
 import { sounds } from '../utils/soundEffects';
 
 interface NavbarProps {
-  currentUser: User;
+  currentUser: User | null;
   activeWilayaId: number;
   onSelectWilaya: (id: number) => void;
   activeTab: string;
@@ -36,7 +37,8 @@ interface NavbarProps {
   unreadNotificationsCount: number;
   onOpenAIAssistant: () => void;
   onOpenCreatePost: () => void;
-  onOpenAuthModal?: () => void;
+  onOpenAuthModal?: (mode?: 'login' | 'register') => void;
+  onLogout?: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   searchQuery: string;
@@ -54,6 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAIAssistant,
   onOpenCreatePost,
   onOpenAuthModal,
+  onLogout,
   isDarkMode,
   onToggleDarkMode,
   searchQuery,
@@ -71,8 +74,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const currentWilaya = ALGERIA_WILAYAS.find(w => w.id === activeWilayaId) || ALGERIA_WILAYAS[56]; // 57 El Mghair
 
-  const cleanPhone = currentUser.phone ? currentUser.phone.replace(/[^0-9]/g, '') : '';
-  const isOwner = cleanPhone === '0777946398' || cleanPhone === '213777946398' || currentUser.role === 'owner' || currentUser.handle === 'kimo_owner';
+  const cleanPhone = currentUser?.phone ? currentUser.phone.replace(/[^0-9]/g, '') : '';
+  const isOwner = (cleanPhone === '0777946398' || cleanPhone === '213777946398' || currentUser?.handle === 'kimo_owner') && currentUser?.role === 'owner';
 
   const filteredWilayas = ALGERIA_WILAYAS.filter(
     w => w.nameAr.includes(wilayaSearch) || 
@@ -216,99 +219,125 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* User Profile Avatar / Menu */}
           <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center gap-1.5 p-1 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition focus:outline-none"
-            >
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-8 h-8 rounded-xl object-cover border-2 border-emerald-500"
-              />
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
-            </button>
+            {currentUser ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-1.5 p-1 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition focus:outline-none"
+                >
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-8 h-8 rounded-xl object-cover border-2 border-emerald-500"
+                  />
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
+                </button>
 
-            {/* Dropdown Menu */}
-            {isUserMenuOpen && (
-              <div 
-                className="absolute left-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2"
-                onClick={() => setIsUserMenuOpen(false)}
-              >
-                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 text-right">
-                  <p className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1">
-                    {currentUser.name}
-                    {currentUser.isVerified && <Check className="w-3.5 h-3.5 text-cyan-500" />}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">@{currentUser.handle}</p>
-                  
-                  {currentUser.phone && (
-                    <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-300 font-mono" dir="ltr">
-                      <Phone className="w-3 h-3 text-cyan-500" />
-                      <span>{currentUser.phone}</span>
+                {/* Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <div 
+                    className="absolute left-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 text-right">
+                      <p className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                        {currentUser.name}
+                        {currentUser.isVerified && <Check className="w-3.5 h-3.5 text-cyan-500" />}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">@{currentUser.handle}</p>
+                      
+                      {currentUser.phone && (
+                        <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-300 font-mono" dir="ltr">
+                          <Phone className="w-3 h-3 text-cyan-500" />
+                          <span>{currentUser.phone}</span>
+                        </div>
+                      )}
+
+                      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-cyan-600 dark:text-cyan-400">
+                        <MapPin className="w-3 h-3" />
+                        <span>ولاية {currentUser.wilayaName}</span>
+                      </div>
                     </div>
-                  )}
 
-                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-cyan-600 dark:text-cyan-400">
-                    <MapPin className="w-3 h-3" />
-                    <span>ولاية {currentUser.wilayaName}</span>
+                    <div className="py-1">
+                      <button
+                        type="button"
+                        onClick={() => onSelectTab('profile')}
+                        className="w-full text-right px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between"
+                      >
+                        <span>ملفي الشخصي</span>
+                        <span className="text-xs bg-slate-100 dark:bg-slate-600 px-2 py-0.5 rounded-full">{currentUser.reputationPoints} نقطة</span>
+                      </button>
+
+                      {onOpenAuthModal && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenAuthModal('register')}
+                          className="w-full text-right px-4 py-2 text-sm text-cyan-700 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between font-bold"
+                        >
+                          <span>تسجيل حساب جديد (برقم الهاتف)</span>
+                          <UserPlus className="w-4 h-4 text-cyan-500" />
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => onSelectTab('region')}
+                        className="w-full text-right px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between"
+                      >
+                        <span>منطقتي ({currentWilaya.nameAr})</span>
+                        <Compass className="w-4 h-4 text-cyan-500" />
+                      </button>
+
+                      {isOwner && (
+                        <button
+                          type="button"
+                          onClick={() => onSelectTab('admin')}
+                          className="w-full text-right px-4 py-2 text-sm text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center justify-between font-semibold"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>لوحة تحكم المالك</span>
+                            <span className="text-[10px] bg-amber-500 text-white px-1.5 py-0.2 rounded font-mono">👑</span>
+                          </span>
+                          <ShieldCheck className="w-4 h-4 text-amber-500" />
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => onSelectTab('marketplace')}
+                        className="w-full text-right px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between"
+                      >
+                        <span>السوق المحلي بالدينار (DZD)</span>
+                        <Building2 className="w-4 h-4 text-slate-400" />
+                      </button>
+
+                      {onLogout && (
+                        <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-700">
+                          <button
+                            type="button"
+                            onClick={onLogout}
+                            className="w-full text-right px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-between font-bold transition"
+                          >
+                            <span>تسجيل الخروج (Déconnexion)</span>
+                            <LogOut className="w-4 h-4 text-rose-500" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={() => onSelectTab('profile')}
-                    className="w-full text-right px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between"
-                  >
-                    <span>ملفي الشخصي</span>
-                    <span className="text-xs bg-slate-100 dark:bg-slate-600 px-2 py-0.5 rounded-full">{currentUser.reputationPoints} نقطة</span>
-                  </button>
-
-                  {onOpenAuthModal && (
-                    <button
-                      type="button"
-                      onClick={onOpenAuthModal}
-                      className="w-full text-right px-4 py-2 text-sm text-cyan-700 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between font-bold"
-                    >
-                      <span>تسجيل حساب جديد (برقم الهاتف)</span>
-                      <UserPlus className="w-4 h-4 text-cyan-500" />
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => onSelectTab('region')}
-                    className="w-full text-right px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between"
-                  >
-                    <span>منطقتي ({currentWilaya.nameAr})</span>
-                    <Compass className="w-4 h-4 text-cyan-500" />
-                  </button>
-
-                  {isOwner && (
-                    <button
-                      type="button"
-                      onClick={() => onSelectTab('admin')}
-                      className="w-full text-right px-4 py-2 text-sm text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-700 flex items-center justify-between font-semibold"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <span>لوحة تحكم المالك</span>
-                        <span className="text-[10px] bg-amber-500 text-white px-1.5 py-0.2 rounded font-mono">👑</span>
-                      </span>
-                      <ShieldCheck className="w-4 h-4 text-amber-500" />
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => onSelectTab('marketplace')}
-                    className="w-full text-right px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-700 flex items-center justify-between"
-                  >
-                    <span>السوق المحلي بالدينار (DZD)</span>
-                    <Building2 className="w-4 h-4 text-slate-400" />
-                  </button>
-                </div>
-              </div>
+                )}
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onOpenAuthModal?.('register')}
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 transition active:scale-95"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>دخول / تسجيل</span>
+              </button>
             )}
           </div>
         </div>

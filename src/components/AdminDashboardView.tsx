@@ -94,7 +94,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const [customPoints, setCustomPoints] = useState<number>(0);
 
   const cleanCurrentPhone = currentUser.phone ? currentUser.phone.replace(/[^0-9]/g, '') : '';
-  const isOwner = cleanCurrentPhone === OWNER_PHONE || cleanCurrentPhone === `213${OWNER_PHONE.slice(1)}` || currentUser.role === 'owner';
+  const isOwner = (cleanCurrentPhone === OWNER_PHONE || cleanCurrentPhone === `213${OWNER_PHONE.slice(1)}` || currentUser.handle === 'kimo_owner') && currentUser.role === 'owner';
 
   const pendingReports = reports.filter(r => r.status === 'pending');
 

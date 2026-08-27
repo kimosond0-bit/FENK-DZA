@@ -24,7 +24,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const currentWilaya = ALGERIA_WILAYAS.find(w => w.id === activeWilayaId) || ALGERIA_WILAYAS[56];
   
   const cleanPhone = currentUser?.phone ? currentUser.phone.replace(/[^0-9]/g, '') : '';
-  const isOwner = cleanPhone === OWNER_PHONE || cleanPhone === `213${OWNER_PHONE.slice(1)}` || currentUser?.role === 'owner' || currentUser?.handle === 'kimo_owner';
+  const isOwner = (cleanPhone === OWNER_PHONE || cleanPhone === `213${OWNER_PHONE.slice(1)}` || currentUser?.handle === 'kimo_owner') && currentUser?.role === 'owner';
 
   const tabs = [
     { id: 'home', label: 'الرئيسية', icon: Home },

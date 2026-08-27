@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Building,
   Sparkles,
-  Phone
+  Phone,
+  LogOut
 } from 'lucide-react';
 import { User, Post, MarketplaceItem } from '../types';
 import { PostCard } from './PostCard';
@@ -32,6 +33,7 @@ interface ProfileViewProps {
   onTipDZD: (post: Post, amount: number) => void;
   onUpdateBio?: (newBio: string) => void;
   onOpenAuthModal?: () => void;
+  onLogout?: () => void;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
@@ -49,6 +51,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   onTipDZD,
   onUpdateBio,
   onOpenAuthModal,
+  onLogout,
 }) => {
   const [activeTab, setActiveTab] = useState<'posts' | 'market' | 'saved' | 'badges'>('posts');
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -168,6 +171,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     <ShieldCheck className="w-4 h-4" />
                     <span>توثيق الهوية الجزائرية</span>
                   </button>
+
+                  {onLogout && (
+                    <button
+                      type="button"
+                      onClick={onLogout}
+                      className="flex-1 sm:flex-none px-4 py-2.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 text-xs font-bold hover:bg-rose-100 flex items-center justify-center gap-1.5 transition"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>تسجيل الخروج</span>
+                    </button>
+                  )}
                 </>
               ) : (
                 <button

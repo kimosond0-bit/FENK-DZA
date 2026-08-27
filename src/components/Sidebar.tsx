@@ -22,7 +22,7 @@ import { ALGERIA_WILAYAS } from '../data/wilayas';
 interface SidebarProps {
   activeTab: string;
   onSelectTab: (tab: string) => void;
-  currentUser: User;
+  currentUser?: User | null;
   activeWilayaId: number;
   unreadMessagesCount: number;
   unreadNotificationsCount: number;
@@ -44,8 +44,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const currentWilaya = ALGERIA_WILAYAS.find(w => w.id === activeWilayaId) || ALGERIA_WILAYAS[56];
 
-  const cleanPhone = currentUser.phone ? currentUser.phone.replace(/[^0-9]/g, '') : '';
-  const isOwner = cleanPhone === '0777946398' || cleanPhone === '213777946398' || currentUser.role === 'owner' || currentUser.handle === 'kimo_owner';
+  const cleanPhone = currentUser?.phone ? currentUser.phone.replace(/[^0-9]/g, '') : '';
+  const isOwner = (cleanPhone === '0777946398' || cleanPhone === '213777946398' || currentUser?.handle === 'kimo_owner') && currentUser?.role === 'owner';
 
   const navItems = [
     { id: 'home', label: 'الرئيسية', icon: Home, badge: null },
